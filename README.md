@@ -1,11 +1,20 @@
 # twitter-login
 
-These env variables should be configured:
+## Setup
 
 ```
-TWITTER_CONSUMER_KEY
-TWITTER_CONSUMER_SECRET
-TWITTER_OAUTH_CALLBACK
+$ git clone https://github.com/franmomu/twitter-login.git
+$ cd twitter-login
+$ composer install
+$ TWITTER_CONSUMER_KEY=xxxx TWITTER_CONSUMER_SECRET=yyy TWITTER_OAUTH_CALLBACK=zzz php -S localhost:8000
+```
+Then you can access to: 
+
+```
+http://localhost:8000/twitter/login
+http://localhost:8000/twitter/id
+http://localhost:8000/twitter/callback
+http://localhost:8000/twitter/logout
 ```
 
 #### /twitter/login
