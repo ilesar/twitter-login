@@ -10,6 +10,7 @@ require __DIR__ . '/vendor/autoload.php';
 $consumerKey = getenv('TWITTER_CONSUMER_KEY');
 $consumerSecret = getenv('TWITTER_CONSUMER_SECRET');
 $oauthCallback = getenv('TWITTER_OAUTH_CALLBACK');
+$redirectUrl = getenv('TWITTER_REDIRECT_URL');
 
 $app = AppFactory::create();
 
@@ -18,13 +19,21 @@ if (!isset($_SESSION)) {
     session_start();
 }
 
-$app->get('/twitter/login', function (Request $request, Response $response, $args) use ($consumerKey, $consumerSecret, $oauthCallback) {
+function prepareAjaxResponse($response, $data) {
+    $payload = json_encode($data);
+
+    $response->getBody()->write($payload);
+    return $response
+        ->withHeader('Content-Type', 'application/json')
+        ->withHeader('Access-Control-Allow-Credentials', 'true');
+}
+
+$app->get('/twitter/login', function (Request $request, Response $response, $args) use ($consumerKey, $consumerSecret, $oauthCallback, $redirectUrl) {
     if (isset($_SESSION['access_token'])) {
         return $response
-            ->withHeader('Location', '/twitter/id')
+            ->withHeader('Location', $redirectUrl)
             ->withStatus(302);
     }
-
     $connection = new TwitterOAuth($consumerKey, $consumerSecret);
     $request_token = $connection->oauth('oauth/request_token', array('oauth_callback' => $oauthCallback));
 
@@ -33,17 +42,17 @@ $app->get('/twitter/login', function (Request $request, Response $response, $arg
 
     $url = $connection->url('oauth/authorize', array('oauth_token' => $request_token['oauth_token']));
 
-    return $response
-        ->withHeader('Location', $url)
-        ->withStatus(302);
+//    var_dump($url);die;
+    return prepareAjaxResponse($response, ['url' => $url]);
+//    return $response
+//        ->withHeader('Location', $url)
+//        ->withStatus(302);
 });
 
 $app->get('/twitter/logout', function (Request $request, Response $response, $args) {
     unset($_SESSION['access_token']);
 
-    return $response
-        ->withHeader('Location', '/twitter/login')
-        ->withStatus(302);
+    return prepareAjaxResponse($response, ['status' => 'ok']);
 });
 
 $app->get('/twitter/callback', function (Request $request, Response $response, $args) use ($consumerKey, $consumerSecret) {
@@ -52,8 +61,6 @@ $app->get('/twitter/callback', function (Request $request, Response $response, $
     $request_token['oauth_token_secret'] = $_SESSION['oauth_token_secret'];
 
     if (isset($request->getQueryParams()['oauth_token']) && $request_token['oauth_token'] !== $request->getQueryParams()['oauth_token']) {
-        // Abort! Something is wrong.
-
         return $response
             ->withHeader('Location', '/twitter/login')
             ->withStatus(302);
@@ -65,24 +72,17 @@ $app->get('/twitter/callback', function (Request $request, Response $response, $
 
     $_SESSION['access_token'] = $access_token;
 
-    return $response
-        ->withHeader('Location', '/twitter/id')
-        ->withStatus(302);
+    return prepareAjaxResponse($response, ['id' => $access_token['user_id']]);
 });
 
 $app->get('/twitter/id', function (Request $request, Response $response, $args) {
-    if (!isset($_SESSION['access_token'])) {
-        return $response
-            ->withHeader('Location', '/twitter/login')
-            ->withStatus(302);
+    $id = null;
+
+    if (isset($_SESSION['access_token'])) {
+        $id = $_SESSION['access_token']['user_id'];
     }
 
-    $data = ['id' => $_SESSION['access_token']['user_id']];
-    $payload = json_encode($data);
-
-    $response->getBody()->write($payload);
-    return $response
-        ->withHeader('Content-Type', 'application/json');
+    return prepareAjaxResponse($response, ['id' => ['id' => $id]]);
 });
 
 $app->run();
