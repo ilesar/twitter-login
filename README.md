@@ -1,4 +1,4 @@
-# twitter-login
+# twitter-login-with-ajax
 
 ## Setup
 
