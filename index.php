@@ -1,4 +1,5 @@
 <?php
+header("Access-Control-Allow-Origin: http://localhost:8080");
 
 use Abraham\TwitterOAuth\TwitterOAuth;
 use Slim\Factory\AppFactory;
@@ -82,7 +83,7 @@ $app->get('/twitter/id', function (Request $request, Response $response, $args) 
         $id = $_SESSION['access_token']['user_id'];
     }
 
-    return prepareAjaxResponse($response, ['id' => ['id' => $id]]);
+    return prepareAjaxResponse($response, ['id' => $id]);
 });
 
 $app->run();
