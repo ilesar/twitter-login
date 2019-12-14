@@ -8,7 +8,7 @@ $ cd twitter-login
 $ composer install
 $ TWITTER_CONSUMER_KEY=xxxx TWITTER_CONSUMER_SECRET=yyy TWITTER_OAUTH_CALLBACK=zzz TWITTER_REDIRECT_URL=http://localhost:8080 php -S localhost:8000
 ```
-Then you can access to: 
+Then you can access to:     
 
 ```
 http://localhost:8000/twitter/login
