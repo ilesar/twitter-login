@@ -1,5 +1,4 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:8080");
 
 use Abraham\TwitterOAuth\TwitterOAuth;
 use Slim\Factory\AppFactory;
