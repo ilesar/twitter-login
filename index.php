@@ -61,6 +61,8 @@ $app->get('/twitter/callback', function (Request $request, Response $response, $
     $request_token['oauth_token'] = $_SESSION['oauth_token'];
     $request_token['oauth_token_secret'] = $_SESSION['oauth_token_secret'];
 
+
+
     if (isset($request->getQueryParams()['oauth_token']) && $request_token['oauth_token'] !== $request->getQueryParams()['oauth_token']) {
         return $response
             ->withHeader('Location', '/twitter/login')
@@ -84,6 +86,28 @@ $app->get('/twitter/id', function (Request $request, Response $response, $args) 
     }
 
     return prepareAjaxResponse($response, ['id' => $id]);
+});
+
+$app->get('/twitter/post', function (Request $request, Response $response, $args) use ($consumerKey, $consumerSecret, $oauthCallback, $redirectUrl) {
+    $request_token = [];
+    $request_token['oauth_token'] = $_SESSION['oauth_token'];
+    $request_token['oauth_token_secret'] = $_SESSION['oauth_token_secret'];
+
+    if (isset($_SESSION['access_token']) === false) {
+        return prepareAjaxResponse($response, ['status' => 'fail']);
+    }
+
+    $accessToken = $_SESSION['access_token']['oauth_token'];
+    $accessTokenSecret = $_SESSION['access_token']['oauth_token_secret'];
+
+    $connection = new TwitterOAuth($consumerKey, $consumerSecret, $accessToken, $accessTokenSecret);
+    $statues = $connection->post("statuses/update", ["status" => "I’ve voted, have you? Just voted for the best websites of the year on @Awwwards! For the chance to win 2 tickets to Awwwards Conference Amsterdam head this way: LINK  #AwwwardsSOTY"]);
+
+    if ($connection->getLastHttpCode() == 200) {
+        return prepareAjaxResponse($response, ['status' => 'ok']);
+    }
+
+    return prepareAjaxResponse($response, ['id' => 'fail']);
 });
 
 $app->run();
