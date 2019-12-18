@@ -1,4 +1,5 @@
 <?php
+header("Access-Control-Allow-Origin: http://localhost:8080");
 
 use Abraham\TwitterOAuth\TwitterOAuth;
 use Slim\Factory\AppFactory;
@@ -10,7 +11,6 @@ require __DIR__ . '/vendor/autoload.php';
 $consumerKey = getenv('TWITTER_CONSUMER_KEY');
 $consumerSecret = getenv('TWITTER_CONSUMER_SECRET');
 $oauthCallback = getenv('TWITTER_OAUTH_CALLBACK');
-$redirectUrl = getenv('TWITTER_REDIRECT_URL');
 
 $app = AppFactory::create();
 
@@ -28,12 +28,7 @@ function prepareAjaxResponse($response, $data) {
         ->withHeader('Access-Control-Allow-Credentials', 'true');
 }
 
-$app->get('/twitter/login', function (Request $request, Response $response, $args) use ($consumerKey, $consumerSecret, $oauthCallback, $redirectUrl) {
-    if (isset($_SESSION['access_token'])) {
-        return $response
-            ->withHeader('Location', $redirectUrl)
-            ->withStatus(302);
-    }
+$app->get('/twitter/login', function (Request $request, Response $response, $args) use ($consumerKey, $consumerSecret, $oauthCallback) {
     $connection = new TwitterOAuth($consumerKey, $consumerSecret);
     $request_token = $connection->oauth('oauth/request_token', array('oauth_callback' => $oauthCallback));
 
@@ -87,7 +82,7 @@ $app->get('/twitter/id', function (Request $request, Response $response, $args) 
     return prepareAjaxResponse($response, ['id' => $id]);
 });
 
-$app->get('/twitter/post', function (Request $request, Response $response, $args) use ($consumerKey, $consumerSecret, $oauthCallback, $redirectUrl) {
+$app->get('/twitter/post', function (Request $request, Response $response, $args) use ($consumerKey, $consumerSecret, $oauthCallback) {
     $request_token = [];
     $request_token['oauth_token'] = $_SESSION['oauth_token'];
     $request_token['oauth_token_secret'] = $_SESSION['oauth_token_secret'];
