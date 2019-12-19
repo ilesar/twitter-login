@@ -1,5 +1,12 @@
 <?php
-header("Access-Control-Allow-Origin: http://app.staging.awwwards2019.s3-website.eu-central-1.amazonaws.com");
+
+$accessControlAllowOrigin = getenv('ACAO');
+
+if ($accessControlAllowOrigin !== false) {
+    header(vsprintf("Access-Control-Allow-Origin: %s", [
+        $accessControlAllowOrigin,
+    ]));
+}
 
 use Abraham\TwitterOAuth\TwitterOAuth;
 use Slim\Factory\AppFactory;
