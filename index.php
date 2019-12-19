@@ -1,5 +1,5 @@
 <?php
-header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Origin: http://app.staging.awwwards2019.s3-website.eu-central-1.amazonaws.com");
 
 use Abraham\TwitterOAuth\TwitterOAuth;
 use Slim\Factory\AppFactory;
